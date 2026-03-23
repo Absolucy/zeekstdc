@@ -35,3 +35,6 @@ zeekstd = "0.6"
 [profile.release]
 lto = "thin"
 debug = "limited"
+
+[features]
+extra-safety-checks = []

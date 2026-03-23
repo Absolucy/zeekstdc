@@ -24,6 +24,11 @@ fn set_last_error(msg: impl Into<String>) {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn zs_open_file(file_name: *const c_char, compression_level: i32) -> *mut c_void {
+	#[cfg(feature = "extra-safety-checks")]
+	if file_name.is_null() {
+		set_last_error("no file name passed to zs_open_file");
+		return std::ptr::null_mut();
+	}
 	let file_name = unsafe { CStr::from_ptr(file_name) }.to_string_lossy();
 	let file = match File::create(file_name.as_ref()) {
 		Ok(file) => file,
@@ -48,6 +53,17 @@ pub extern "C" fn zs_open_file(file_name: *const c_char, compression_level: i32)
 
 #[unsafe(no_mangle)]
 pub extern "C" fn zs_write(encoder: *mut c_void, data: *const u8, len: usize) -> bool {
+	#[cfg(feature = "extra-safety-checks")]
+	{
+		if encoder.is_null() {
+			set_last_error("null encoder passed to zs_write");
+			return false;
+		}
+		if data.is_null() || len == 0 {
+			// nothing to write, don't bother
+			return true;
+		}
+	}
 	let encoder = encoder as *mut OurEncoder;
 	let bytes = unsafe { std::slice::from_raw_parts(data, len) };
 	match unsafe { (*encoder).write_all(bytes) } {
@@ -61,6 +77,11 @@ pub extern "C" fn zs_write(encoder: *mut c_void, data: *const u8, len: usize) ->
 
 #[unsafe(no_mangle)]
 pub extern "C" fn zs_flush(encoder: *mut c_void) -> bool {
+	#[cfg(feature = "extra-safety-checks")]
+	if encoder.is_null() {
+		set_last_error("null encoder passed to zs_flush");
+		return false;
+	}
 	let encoder = encoder as *mut OurEncoder;
 	match unsafe { (*encoder).flush() } {
 		Ok(_) => true,
@@ -73,6 +94,11 @@ pub extern "C" fn zs_flush(encoder: *mut c_void) -> bool {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn zs_finish(encoder: *mut c_void) -> u64 {
+	#[cfg(feature = "extra-safety-checks")]
+	if encoder.is_null() {
+		set_last_error("null encoder passed to zs_finish");
+		return 0;
+	}
 	let encoder = encoder as *mut OurEncoder;
 	let encoder = unsafe { Box::from_raw(encoder) };
 	match encoder.finish() {

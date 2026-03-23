@@ -1,5 +1,7 @@
 a very simple C wrapper for the [zeekstd](https://github.com/rorosen/zeekstd) crate, albeit currently only with support for writing.
 
+also there's the `extra-safety-checks` feature that enables some, well, extra safety checks for null pointers and whatever.
+
 ```c
 /// Creates a new seekable ZSTD file to write to, with the given compression
 /// level.
