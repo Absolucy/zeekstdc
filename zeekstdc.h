@@ -33,7 +33,8 @@ bool zs_flush(void *encoder);
 /// DAMMIT.
 uint64_t zs_finish(void *encoder);
 
-/// Returns a string description of the last error (if there is one)
+/// Returns a string description of the last error.
+/// If there is no last error, it will be a blank string.
 const char *zs_last_error();
 
 #ifdef __cplusplus

@@ -10,7 +10,7 @@ use zeekstd::{EncodeOptions, Encoder};
 type OurEncoder = Encoder<'static, File>;
 
 thread_local! {
-	static LAST_ERROR: RefCell<Option<CString>> = const { RefCell::new(None) };
+	static LAST_ERROR: RefCell<CString> = RefCell::new(CString::default());
 }
 
 fn set_last_error(msg: impl Into<String>) {
@@ -19,7 +19,7 @@ fn set_last_error(msg: impl Into<String>) {
 		Ok(msg) => msg,
 		Err(err) => CString::new(&msg.as_bytes()[..err.nul_position()]).unwrap_or_default(),
 	};
-	LAST_ERROR.with_borrow_mut(|last_error| *last_error = Some(msg));
+	LAST_ERROR.set(msg)
 }
 
 #[unsafe(no_mangle)]
@@ -112,10 +112,5 @@ pub extern "C" fn zs_finish(encoder: *mut c_void) -> u64 {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn zs_last_error() -> *const c_char {
-	LAST_ERROR.with_borrow(|last_error| {
-		last_error
-			.as_deref()
-			.map(|e| e.as_ptr())
-			.unwrap_or(std::ptr::null())
-	})
+	LAST_ERROR.with_borrow(|last_error| last_error.as_ptr())
 }
