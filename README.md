@@ -30,7 +30,9 @@ bool zs_flush(void *encoder);
 uint64_t zs_finish(void *encoder);
 
 /// Returns a string description of the last error.
-/// If there is no last error, it will be a blank string.
+///
+/// If there is no last error, it will be a blank string - this will never
+/// return a null pointer.
 const char *zs_last_error();
 ```
 
