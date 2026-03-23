@@ -31,6 +31,7 @@ string_to_string = "warn"
 
 [dependencies]
 zeekstd = "0.6"
+vc-ltl = { version = "5", optional = true }
 
 [profile.release]
 lto = "thin"
