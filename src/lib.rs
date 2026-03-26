@@ -93,11 +93,23 @@ pub extern "C" fn zs_flush(encoder: *mut c_void) -> bool {
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn zs_free(encoder: *mut c_void) {
+	#[cfg(feature = "extra-safety-checks")]
+	if encoder.is_null() {
+		return;
+	}
+	let encoder = encoder as *mut OurEncoder;
+	std::mem::drop(unsafe { Box::from_raw(encoder) });
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn zs_finish(encoder: *mut c_void) -> u64 {
+	const ERROR_RETVAL: u64 = -1_i64 as u64;
+
 	#[cfg(feature = "extra-safety-checks")]
 	if encoder.is_null() {
 		set_last_error("null encoder passed to zs_finish");
-		return 0;
+		return ERROR_RETVAL;
 	}
 	let encoder = encoder as *mut OurEncoder;
 	let encoder = unsafe { Box::from_raw(encoder) };
@@ -105,7 +117,7 @@ pub extern "C" fn zs_finish(encoder: *mut c_void) -> u64 {
 		Ok(written) => written,
 		Err(err) => {
 			set_last_error(err.to_string());
-			0
+			ERROR_RETVAL
 		}
 	}
 }

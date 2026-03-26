@@ -25,9 +25,17 @@ bool zs_flush(void *encoder);
 
 /// Finishes up the compressed file, writing everything to the disk.
 ///
+/// If the return value is ZS_FINISH_ERRORED, then it errored.
+///
 /// `encoder` will no longer be valid after this, so like, SET IT TO NULL
 /// DAMMIT.
 uint64_t zs_finish(void *encoder);
+
+/// Frees an encoder without properly finishing it up.
+///
+/// `encoder` will no longer be valid after this, so like, SET IT TO NULL
+/// DAMMIT.
+void zs_free(void *encoder);
 
 /// Returns a string description of the last error.
 ///
